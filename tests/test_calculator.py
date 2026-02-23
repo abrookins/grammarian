@@ -48,6 +48,16 @@ class TestGeometricMean:
     def test_empty_list(self) -> None:
         assert geometric_mean([]) == 0.0
 
+    def test_mismatched_weights(self) -> None:
+        """Test that mismatched values and weights raises error."""
+        with pytest.raises(ValueError, match="same length"):
+            geometric_mean([0.5, 0.6, 0.7], weights=[1.0, 1.0])
+
+    def test_zero_weight_sum(self) -> None:
+        """Test handling when weights sum to zero."""
+        result = geometric_mean([0.5, 0.6], weights=[0.0, 0.0])
+        assert result == 0.0
+
 
 class TestCalculator:
     """Tests for Calculator class."""

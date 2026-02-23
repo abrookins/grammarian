@@ -121,3 +121,46 @@ class TestStyleMetric:
         result = metric.analyze("")
         assert result.score == 1.0
 
+    def test_whitespace_only(self) -> None:
+        """Test style metric with whitespace-only text."""
+        metric = StyleMetric()
+        result = metric.analyze("   \n\t  ")
+        assert result.score == 1.0
+
+
+class TestSpellingMetricCustomWords:
+    """Tests for SpellingMetric custom words."""
+
+    def test_custom_words_loaded(self) -> None:
+        """Test that custom words are loaded into spell checker."""
+        custom = ["xyzabc", "customword"]
+        metric = SpellingMetric({"custom_words": custom})
+        result = metric.analyze("The xyzabc customword feature.")
+        # Custom words should not be flagged as misspellings
+        assert result.score > 0.9
+
+    def test_zero_words(self) -> None:
+        """Test spelling with text that has no recognizable words."""
+        metric = SpellingMetric()
+        result = metric.analyze("   ")  # Just whitespace
+        assert result.score == 1.0
+
+    def test_no_alphabetic_words(self) -> None:
+        """Test spelling with text that has no alphabetic words after extraction."""
+        metric = SpellingMetric()
+        # Only numbers and punctuation - no actual words
+        result = metric.analyze("123 456 789! @#$ %^& *().")
+        # Should return 1.0 score since no words to check
+        assert result.score == 1.0
+
+
+class TestStyleMetricEdgeCases:
+    """Edge case tests for StyleMetric."""
+
+    def test_no_words_after_split(self) -> None:
+        """Test style metric with text that produces zero words after split."""
+        metric = StyleMetric()
+        # Only punctuation/symbols - no actual words
+        result = metric.analyze("!@#$%^&*()")
+        assert result.score == 1.0
+
