@@ -148,6 +148,26 @@ Grammarian looks for configuration in these locations (in order):
 2. `grammarian.toml` in current or parent directories
 3. `pyproject.toml` under `[tool.grammarian]`
 
+### Generating a Configuration File
+
+Use the `config init` command to generate a comprehensive example configuration:
+
+```bash
+# Generate .grammarian.toml in current directory
+grammarian config init
+
+# Generate with a custom filename
+grammarian config init --output custom.toml
+
+# Preview the config without writing to file
+grammarian config init --stdout
+
+# Overwrite an existing config file
+grammarian config init --force
+```
+
+The generated file includes all available options with documentation comments.
+
 ### Configuration File Format
 
 ```toml
@@ -221,6 +241,43 @@ context = "Technical documentation for developers"
 | `technical` | 12 | 35 words | No | Technical docs |
 | `casual` | 8 | 25 words | Yes | Blog posts |
 | `academic` | 14 | 40 words | Yes | Academic papers |
+
+### Disabling Specific Rules
+
+You can disable specific grammar and style rules that don't apply to your project. Add them to the `disabled_rules` list in your grammar metric configuration:
+
+```toml
+[metrics.grammar.options]
+disabled_rules = [
+    "typography.symbols.curly_quotes",  # Disable curly quote suggestions
+    "typography.symbols.ellipsis",      # Disable ellipsis suggestions
+    "misc.phrasal_adjectives",          # Hyphenation suggestions
+]
+```
+
+**Common Proselint rules to disable:**
+
+| Rule ID | Description |
+|---------|-------------|
+| `typography.symbols.curly_quotes` | Suggests using curly quotes instead of straight quotes |
+| `typography.symbols.ellipsis` | Suggests using the ellipsis character (…) |
+| `typography.symbols.sentence_spacing` | Checks spacing after periods |
+| `misc.phrasal_adjectives` | Hyphenation of phrasal adjectives |
+| `misc.preferred_forms` | Suggests preferred word forms |
+| `leonard.exclamation` | Warns about exclamation marks |
+| `redundancy.ras_syndrome` | Redundant acronym syndrome (e.g., "ATM machine") |
+| `dates_times.am_pm` | AM/PM formatting suggestions |
+
+**LanguageTool rules** (if installed):
+
+| Rule ID | Description |
+|---------|-------------|
+| `WHITESPACE_RULE` | Whitespace issues |
+| `EN_QUOTES` | Quote style checking |
+| `COMMA_PARENTHESIS_WHITESPACE` | Comma/parenthesis spacing |
+| `UPPERCASE_SENTENCE_START` | Sentence capitalization |
+
+Run `grammarian config init` to generate a configuration file with all common rules documented.
 
 ## Git Integration
 
@@ -333,6 +390,7 @@ grammarian [OPTIONS] COMMAND [ARGS]...
 
 Commands:
   analyze  Analyze text files for writing quality
+  config   Manage Grammarian configuration
 
 Options:
   --version  Show version and exit
@@ -356,6 +414,27 @@ Options:
   --ai                     Enable AI-powered feedback
   --ai-model TEXT          LLM model for AI feedback
   --help                   Show help message and exit
+```
+
+### `config` Command
+
+```
+grammarian config [OPTIONS] COMMAND [ARGS]...
+
+Commands:
+  init  Generate an example configuration file
+```
+
+### `config init` Command
+
+```
+grammarian config init [OPTIONS]
+
+Options:
+  -o, --output PATH  Output file path (default: .grammarian.toml)
+  -s, --stdout       Print to stdout instead of writing to file
+  -f, --force        Overwrite existing configuration file
+  --help             Show help message and exit
 ```
 
 ## Programmatic Usage

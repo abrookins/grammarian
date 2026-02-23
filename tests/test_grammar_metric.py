@@ -1,8 +1,10 @@
 """Tests for GrammarMetric."""
 
+import json
+import subprocess
+
 import pytest
 from unittest.mock import MagicMock, patch
-import subprocess
 
 from grammarian.metrics.grammar import GrammarMetric
 from grammarian.core.models import Severity
