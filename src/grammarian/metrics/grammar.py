@@ -119,6 +119,11 @@ class GrammarMetric(Metric):
                 for file_uri, file_data in file_results.items():
                     diagnostics = file_data.get("diagnostics", [])
                     for diag in diagnostics:
+                        # Filter disabled rules for proselint
+                        check_path = diag.get("check_path", "proselint")
+                        if check_path in self.disabled_rules:
+                            continue
+
                         line, col = diag.get("pos", [1, 1])
                         span = diag.get("span", [0, 0])
                         issues.append(
@@ -129,7 +134,7 @@ class GrammarMetric(Metric):
                                 column=col,
                                 offset=span[0] if span else None,
                                 length=span[1] - span[0] if span and len(span) > 1 else None,
-                                rule_id=diag.get("check_path", "proselint"),
+                                rule_id=check_path,
                                 suggestion=diag.get("replacements"),
                                 file_path=file_path,
                             )

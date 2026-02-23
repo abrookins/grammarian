@@ -91,6 +91,42 @@ class TestGrammarMetricWithProselint:
             result = metric._analyze_with_proselint("", None)
             assert result.score == 1.0
 
+    def test_proselint_disabled_rules_filtered(self) -> None:
+        """Test that disabled rules are filtered from proselint results."""
+        metric = GrammarMetric({
+            "disabled_rules": ["typography.symbols.curly_quotes"]
+        })
+
+        proselint_output = {
+            "result": {
+                "file://test.txt": {
+                    "diagnostics": [
+                        {
+                            "check_path": "typography.symbols.curly_quotes",
+                            "message": "Use curly quotes",
+                            "pos": [1, 1],
+                            "span": [0, 5],
+                        },
+                        {
+                            "check_path": "misc.other_rule",
+                            "message": "Some other issue",
+                            "pos": [2, 1],
+                            "span": [10, 15],
+                        },
+                    ]
+                }
+            }
+        }
+
+        with patch("subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(
+                stdout=json.dumps(proselint_output)
+            )
+            result = metric._analyze_with_proselint("Test text here.", None)
+            # Only the non-disabled rule should appear
+            assert len(result.issues) == 1
+            assert result.issues[0].rule_id == "misc.other_rule"
+
 
 class TestGrammarMetricWithLanguageTool:
     """Tests for LanguageTool integration."""

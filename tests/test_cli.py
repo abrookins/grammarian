@@ -229,6 +229,67 @@ class TestDisplayResults:
         display_results(result)
 
 
+class TestConfigCommand:
+    """Tests for the config command group."""
+
+    def test_config_help(self, runner: CliRunner) -> None:
+        """Test config command help."""
+        result = runner.invoke(cli, ["config", "--help"])
+        assert result.exit_code == 0
+        assert "Manage Grammarian configuration" in result.output
+
+    def test_config_init_help(self, runner: CliRunner) -> None:
+        """Test config init help."""
+        result = runner.invoke(cli, ["config", "init", "--help"])
+        assert result.exit_code == 0
+        assert "Generate an example configuration file" in result.output
+
+    def test_config_init_stdout(self, runner: CliRunner) -> None:
+        """Test config init to stdout."""
+        result = runner.invoke(cli, ["config", "init", "--stdout"])
+        assert result.exit_code == 0
+        assert "# Grammarian Configuration File" in result.output
+        assert "typography.symbols.curly_quotes" in result.output
+        assert "[profiles.default]" in result.output
+        assert "[metrics.grammar]" in result.output
+        assert "disabled_rules" in result.output
+
+    def test_config_init_creates_file(self, runner: CliRunner, tmp_path) -> None:
+        """Test config init creates a file."""
+        output_file = tmp_path / ".grammarian.toml"
+        result = runner.invoke(cli, ["config", "init", "--output", str(output_file)])
+        assert result.exit_code == 0
+        assert output_file.exists()
+        content = output_file.read_text()
+        assert "# Grammarian Configuration File" in content
+        assert "typography.symbols.curly_quotes" in content
+
+    def test_config_init_default_filename(self, runner: CliRunner, tmp_path, monkeypatch) -> None:
+        """Test config init uses .grammarian.toml by default."""
+        monkeypatch.chdir(tmp_path)
+        result = runner.invoke(cli, ["config", "init"])
+        assert result.exit_code == 0
+        assert (tmp_path / ".grammarian.toml").exists()
+
+    def test_config_init_no_overwrite(self, runner: CliRunner, tmp_path) -> None:
+        """Test config init refuses to overwrite without --force."""
+        output_file = tmp_path / ".grammarian.toml"
+        output_file.write_text("existing content")
+        result = runner.invoke(cli, ["config", "init", "--output", str(output_file)])
+        assert result.exit_code == 1
+        assert "already exists" in result.output
+        assert output_file.read_text() == "existing content"
+
+    def test_config_init_force_overwrite(self, runner: CliRunner, tmp_path) -> None:
+        """Test config init overwrites with --force."""
+        output_file = tmp_path / ".grammarian.toml"
+        output_file.write_text("existing content")
+        result = runner.invoke(cli, ["config", "init", "--output", str(output_file), "--force"])
+        assert result.exit_code == 0
+        content = output_file.read_text()
+        assert "# Grammarian Configuration File" in content
+
+
 class TestMainModule:
     """Tests for __main__.py module."""
 
