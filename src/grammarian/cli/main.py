@@ -88,29 +88,52 @@ def cli() -> None:
 @click.option("--format", "output_format", type=click.Choice(["rich", "json"]), default="rich")
 @click.option("--diff", "use_diff", is_flag=True, help="Analyze only changed files (git diff)")
 @click.option("--staged", is_flag=True, help="Analyze only staged changes (use with --diff)")
+@click.option("--profile", "profile_name", default=None, help="Writing style profile (default, technical, casual, academic)")
+@click.option("--config", "config_path", type=click.Path(exists=True), default=None, help="Path to config file")
+@click.option("--ai", "use_ai", is_flag=True, help="Get AI-powered feedback (requires LLM API key)")
+@click.option("--model", "ai_model", default="gpt-4o-mini", help="LLM model for AI feedback")
 def analyze(
     paths: tuple[str, ...],
     min_score: float | None,
     output_format: str,
     use_diff: bool,
     staged: bool,
+    profile_name: str | None,
+    config_path: str | None,
+    use_ai: bool,
+    ai_model: str,
 ) -> None:
     """Analyze text files for writing quality."""
     if not paths and not use_diff:
         console.print("[yellow]No paths specified. Use --help for usage or --diff for git changes.[/yellow]")
         return
 
-    # Import metrics here to allow for lazy loading
+    # Import and load config
+    from grammarian.config import GrammarianConfig, DEFAULT_PROFILES
     from grammarian.metrics.grammar import GrammarMetric
     from grammarian.metrics.readability import ReadabilityMetric
     from grammarian.metrics.spelling import SpellingMetric
     from grammarian.metrics.style import StyleMetric
 
+    # Load configuration
+    config = GrammarianConfig.load(Path(config_path) if config_path else None)
+
+    # Get profile (from args, config, or default)
+    if profile_name and profile_name in DEFAULT_PROFILES:
+        profile = DEFAULT_PROFILES[profile_name]
+    else:
+        profile = config.get_profile(profile_name)
+
+    # Configure metrics based on profile
     calculator = Calculator()
-    calculator.add_metric(ReadabilityMetric())
+    calculator.add_metric(ReadabilityMetric({"target_grade": profile.target_grade}))
     calculator.add_metric(GrammarMetric())
-    calculator.add_metric(SpellingMetric())
-    calculator.add_metric(StyleMetric())
+    calculator.add_metric(SpellingMetric({"custom_words": profile.custom_words}))
+    calculator.add_metric(StyleMetric({
+        "max_sentence_words": profile.max_sentence_words,
+        "check_passive": profile.check_passive,
+        "check_weasel": profile.check_weasel,
+    }))
 
     all_text = []
     analyzed_paths: list[Path] = []
@@ -159,6 +182,20 @@ def analyze(
         console.print(result.model_dump_json(indent=2))
     else:
         display_results(result)
+
+    # AI feedback if requested
+    if use_ai:
+        from grammarian.llm import WritingAdvisor
+
+        console.print("[bold]🤖 AI Feedback:[/bold]")
+        try:
+            advisor = WritingAdvisor(model=ai_model, context=profile.description)
+            feedback = advisor.get_feedback(combined_text, result)
+            console.print(Panel(feedback, title="Writing Coach", border_style="blue"))
+        except ImportError as e:
+            console.print(f"[red]LLM not available: {e}[/red]")
+        except Exception as e:
+            console.print(f"[red]AI feedback failed: {e}[/red]")
 
     if min_score is not None and result.wqi_score < min_score:
         raise SystemExit(1)
