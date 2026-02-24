@@ -2,8 +2,8 @@
 
 import pytest
 
-from grammarian.metrics.base import Metric
-from grammarian.core.models import MetricResult
+from redpen.metrics.base import Metric
+from redpen.core.models import MetricResult
 
 
 class ConcreteMetric(Metric):

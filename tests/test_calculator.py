@@ -2,9 +2,9 @@
 
 import pytest
 
-from grammarian.calculator import Calculator, geometric_mean
-from grammarian.core.models import MetricResult, Rating
-from grammarian.metrics.base import Metric
+from redpen.calculator import Calculator, geometric_mean
+from redpen.core.models import MetricResult, Rating
+from redpen.metrics.base import Metric
 
 
 class MockMetric(Metric):

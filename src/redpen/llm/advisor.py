@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from grammarian.core.models import AnalysisResult, Issue
+from redpen.core.models import AnalysisResult, Issue
 
 
 class WritingAdvisor:

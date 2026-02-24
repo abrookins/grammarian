@@ -5,8 +5,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 from click.testing import CliRunner
 
-from grammarian.cli.main import cli, display_results
-from grammarian.core.models import AnalysisResult, MetricResult, Rating, Issue, Severity
+from redpen.cli.main import cli, display_results
+from redpen.core.models import AnalysisResult, MetricResult, Rating, Issue, Severity
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ class TestCLI:
     def test_help(self, runner: CliRunner) -> None:
         result = runner.invoke(cli, ["--help"])
         assert result.exit_code == 0
-        assert "Grammarian" in result.output
+        assert "Redpen" in result.output
 
     def test_analyze_help(self, runner: CliRunner) -> None:
         result = runner.invoke(cli, ["analyze", "--help"])
@@ -88,7 +88,7 @@ class TestCLI:
 
     def test_analyze_diff_no_changes(self, runner: CliRunner) -> None:
         """Test --diff mode with no changed files."""
-        with patch("grammarian.git.get_changed_files", return_value=[]):
+        with patch("redpen.git.get_changed_files", return_value=[]):
             result = runner.invoke(cli, ["analyze", "--diff"])
             assert "No changed files found" in result.output
 
@@ -97,7 +97,7 @@ class TestCLI:
         test_file = tmp_path / "changed.md"
         test_file.write_text("Changed content here.")
 
-        with patch("grammarian.git.get_changed_files", return_value=[test_file]):
+        with patch("redpen.git.get_changed_files", return_value=[test_file]):
             result = runner.invoke(cli, ["analyze", "--diff"])
             assert result.exit_code == 0
             assert "Writing Quality Index" in result.output
@@ -107,7 +107,7 @@ class TestCLI:
         test_file = tmp_path / "staged.md"
         test_file.write_text("Staged content here.")
 
-        with patch("grammarian.git.get_changed_files", return_value=[test_file]):
+        with patch("redpen.git.get_changed_files", return_value=[test_file]):
             result = runner.invoke(cli, ["analyze", "--diff", "--staged"])
             assert result.exit_code == 0
 
@@ -119,7 +119,7 @@ class TestCLI:
         mock_advisor = MagicMock()
         mock_advisor.get_feedback.return_value = "Great writing!"
 
-        with patch("grammarian.llm.WritingAdvisor", return_value=mock_advisor):
+        with patch("redpen.llm.WritingAdvisor", return_value=mock_advisor):
             result = runner.invoke(cli, ["analyze", str(test_file), "--ai"])
             assert result.exit_code == 0
             assert "AI Feedback" in result.output
@@ -129,7 +129,7 @@ class TestCLI:
         test_file = tmp_path / "test.md"
         test_file.write_text("Test content here.")
 
-        with patch("grammarian.llm.WritingAdvisor", side_effect=ImportError("Not installed")):
+        with patch("redpen.llm.WritingAdvisor", side_effect=ImportError("Not installed")):
             result = runner.invoke(cli, ["analyze", str(test_file), "--ai"])
             assert "LLM not available" in result.output
 
@@ -141,7 +141,7 @@ class TestCLI:
         mock_advisor = MagicMock()
         mock_advisor.get_feedback.side_effect = Exception("API error")
 
-        with patch("grammarian.llm.WritingAdvisor", return_value=mock_advisor):
+        with patch("redpen.llm.WritingAdvisor", return_value=mock_advisor):
             result = runner.invoke(cli, ["analyze", str(test_file), "--ai"])
             assert "AI feedback failed" in result.output
 
@@ -166,7 +166,7 @@ class TestCLI:
         mock_path.read_text = mock_read_text
         mock_path.__str__ = lambda self: str(unreadable_file)
 
-        with patch("grammarian.git.get_changed_files", return_value=[mock_path]):
+        with patch("redpen.git.get_changed_files", return_value=[mock_path]):
             result = runner.invoke(cli, ["analyze", "--diff"])
             # Should handle error gracefully
             assert "Error reading" in result.output or "No text files found" in result.output
@@ -236,7 +236,7 @@ class TestConfigCommand:
         """Test config command help."""
         result = runner.invoke(cli, ["config", "--help"])
         assert result.exit_code == 0
-        assert "Manage Grammarian configuration" in result.output
+        assert "Manage Redpen configuration" in result.output
 
     def test_config_init_help(self, runner: CliRunner) -> None:
         """Test config init help."""
@@ -248,7 +248,7 @@ class TestConfigCommand:
         """Test config init to stdout."""
         result = runner.invoke(cli, ["config", "init", "--stdout"])
         assert result.exit_code == 0
-        assert "# Grammarian Configuration File" in result.output
+        assert "# Redpen Configuration File" in result.output
         assert "typography.symbols.curly_quotes" in result.output
         assert "[profiles.default]" in result.output
         assert "[metrics.grammar]" in result.output
@@ -256,24 +256,24 @@ class TestConfigCommand:
 
     def test_config_init_creates_file(self, runner: CliRunner, tmp_path) -> None:
         """Test config init creates a file."""
-        output_file = tmp_path / ".grammarian.toml"
+        output_file = tmp_path / ".redpen.toml"
         result = runner.invoke(cli, ["config", "init", "--output", str(output_file)])
         assert result.exit_code == 0
         assert output_file.exists()
         content = output_file.read_text()
-        assert "# Grammarian Configuration File" in content
+        assert "# Redpen Configuration File" in content
         assert "typography.symbols.curly_quotes" in content
 
     def test_config_init_default_filename(self, runner: CliRunner, tmp_path, monkeypatch) -> None:
-        """Test config init uses .grammarian.toml by default."""
+        """Test config init uses .redpen.toml by default."""
         monkeypatch.chdir(tmp_path)
         result = runner.invoke(cli, ["config", "init"])
         assert result.exit_code == 0
-        assert (tmp_path / ".grammarian.toml").exists()
+        assert (tmp_path / ".redpen.toml").exists()
 
     def test_config_init_no_overwrite(self, runner: CliRunner, tmp_path) -> None:
         """Test config init refuses to overwrite without --force."""
-        output_file = tmp_path / ".grammarian.toml"
+        output_file = tmp_path / ".redpen.toml"
         output_file.write_text("existing content")
         result = runner.invoke(cli, ["config", "init", "--output", str(output_file)])
         assert result.exit_code == 1
@@ -282,12 +282,12 @@ class TestConfigCommand:
 
     def test_config_init_force_overwrite(self, runner: CliRunner, tmp_path) -> None:
         """Test config init overwrites with --force."""
-        output_file = tmp_path / ".grammarian.toml"
+        output_file = tmp_path / ".redpen.toml"
         output_file.write_text("existing content")
         result = runner.invoke(cli, ["config", "init", "--output", str(output_file), "--force"])
         assert result.exit_code == 0
         content = output_file.read_text()
-        assert "# Grammarian Configuration File" in content
+        assert "# Redpen Configuration File" in content
 
 
 class TestMainModule:
@@ -295,12 +295,12 @@ class TestMainModule:
 
     def test_main_module_import(self) -> None:
         """Test that __main__ module can be imported."""
-        import grammarian.__main__ as main_module
+        import redpen.__main__ as main_module
         assert hasattr(main_module, "cli")
 
     def test_main_module_execution(self, runner: CliRunner) -> None:
         """Test running via python -m."""
-        from grammarian.__main__ import cli as main_cli
+        from redpen.__main__ import cli as main_cli
         result = runner.invoke(main_cli, ["--help"])
         assert result.exit_code == 0
 

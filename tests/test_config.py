@@ -3,8 +3,8 @@
 import pytest
 from pathlib import Path
 
-from grammarian.config import (
-    GrammarianConfig,
+from redpen.config import (
+    RedpenConfig,
     ProfileConfig,
     MetricConfig,
     LLMConfig,
@@ -71,23 +71,23 @@ class TestLLMConfig:
         assert config.context == "Technical docs"
 
 
-class TestGrammarianConfig:
-    """Tests for GrammarianConfig."""
+class TestRedpenConfig:
+    """Tests for RedpenConfig."""
 
     def test_default_values(self) -> None:
-        config = GrammarianConfig()
+        config = RedpenConfig()
         assert config.default_profile == "default"
         assert config.profiles == {}
         assert config.metrics == {}
         assert config.extensions == [".md", ".txt", ".rst"]
 
     def test_get_profile_default(self) -> None:
-        config = GrammarianConfig()
+        config = RedpenConfig()
         profile = config.get_profile()
         assert profile.name == "default"
 
     def test_get_profile_custom(self) -> None:
-        config = GrammarianConfig(
+        config = RedpenConfig(
             profiles={"custom": ProfileConfig(name="custom", target_grade=8)}
         )
         profile = config.get_profile("custom")
@@ -95,29 +95,29 @@ class TestGrammarianConfig:
         assert profile.target_grade == 8
 
     def test_get_profile_unknown_returns_default(self) -> None:
-        config = GrammarianConfig()
+        config = RedpenConfig()
         profile = config.get_profile("unknown")
         assert profile.name == "default"
 
     def test_get_metric_config_default(self) -> None:
-        config = GrammarianConfig()
+        config = RedpenConfig()
         metric_config = config.get_metric_config("spelling")
         assert metric_config.enabled is True
         assert metric_config.weight == 1.0
 
     def test_get_metric_config_custom(self) -> None:
-        config = GrammarianConfig(
+        config = RedpenConfig(
             metrics={"spelling": MetricConfig(weight=2.0)}
         )
         metric_config = config.get_metric_config("spelling")
         assert metric_config.weight == 2.0
 
     def test_load_nonexistent_file(self) -> None:
-        config = GrammarianConfig.load(Path("/nonexistent/path.toml"))
+        config = RedpenConfig.load(Path("/nonexistent/path.toml"))
         assert config.default_profile == "default"
 
     def test_load_from_toml(self, tmp_path: Path) -> None:
-        config_file = tmp_path / ".grammarian.toml"
+        config_file = tmp_path / ".redpen.toml"
         config_file.write_text("""
 default_profile = "technical"
 
@@ -125,7 +125,7 @@ default_profile = "technical"
 name = "technical"
 target_grade = 12
 """)
-        config = GrammarianConfig.load(config_file)
+        config = RedpenConfig.load(config_file)
         assert config.default_profile == "technical"
         profile = config.get_profile("technical")
         assert profile.target_grade == 12
@@ -154,29 +154,29 @@ class TestDefaultProfiles:
 class TestConfigFinding:
     """Tests for config file finding."""
 
-    def test_find_config_with_grammarian_toml(self, tmp_path: Path, monkeypatch) -> None:
-        """Test finding .grammarian.toml config file."""
-        config_file = tmp_path / ".grammarian.toml"
+    def test_find_config_with_redpen_toml(self, tmp_path: Path, monkeypatch) -> None:
+        """Test finding .redpen.toml config file."""
+        config_file = tmp_path / ".redpen.toml"
         config_file.write_text('[profiles.test]\nname = "test"\n')
 
         monkeypatch.chdir(tmp_path)
-        found = GrammarianConfig._find_config()
+        found = RedpenConfig._find_config()
         assert found == config_file
 
     def test_find_config_pyproject_toml(self, tmp_path: Path, monkeypatch) -> None:
         """Test finding config in pyproject.toml."""
         config_file = tmp_path / "pyproject.toml"
         config_file.write_text("""
-[tool.grammarian]
+[tool.redpen]
 default_profile = "technical"
 """)
 
         monkeypatch.chdir(tmp_path)
-        found = GrammarianConfig._find_config()
+        found = RedpenConfig._find_config()
         assert found == config_file
 
-    def test_find_config_pyproject_no_grammarian(self, tmp_path: Path, monkeypatch) -> None:
-        """Test pyproject.toml without grammarian section is ignored."""
+    def test_find_config_pyproject_no_redpen(self, tmp_path: Path, monkeypatch) -> None:
+        """Test pyproject.toml without redpen section is ignored."""
         config_file = tmp_path / "pyproject.toml"
         config_file.write_text("""
 [tool.black]
@@ -184,14 +184,14 @@ line-length = 88
 """)
 
         monkeypatch.chdir(tmp_path)
-        found = GrammarianConfig._find_config()
-        # Should return None since no grammarian config
+        found = RedpenConfig._find_config()
+        # Should return None since no redpen config
         assert found is None
 
     def test_find_config_not_found(self, tmp_path: Path, monkeypatch) -> None:
         """Test when no config file exists."""
         monkeypatch.chdir(tmp_path)
-        found = GrammarianConfig._find_config()
+        found = RedpenConfig._find_config()
         assert found is None
 
 

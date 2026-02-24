@@ -1,2 +1,2 @@
-"""Tests for Grammarian."""
+"""Tests for Proseq."""
 

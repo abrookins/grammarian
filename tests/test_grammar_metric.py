@@ -6,8 +6,8 @@ import subprocess
 import pytest
 from unittest.mock import MagicMock, patch
 
-from grammarian.metrics.grammar import GrammarMetric
-from grammarian.core.models import Severity
+from redpen.metrics.grammar import GrammarMetric
+from redpen.core.models import Severity
 
 
 class TestGrammarMetricBasic:

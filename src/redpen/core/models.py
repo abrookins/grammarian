@@ -1,4 +1,4 @@
-"""Core data models for Grammarian."""
+"""Core data models for Proseq."""
 
 from enum import Enum
 from typing import Any

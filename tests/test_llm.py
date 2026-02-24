@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
-from grammarian.core.models import AnalysisResult, MetricResult, Rating, Issue, Severity
-from grammarian.llm.advisor import WritingAdvisor
+from redpen.core.models import AnalysisResult, MetricResult, Rating, Issue, Severity
+from redpen.llm.advisor import WritingAdvisor
 
 
 @pytest.fixture

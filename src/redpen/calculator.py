@@ -3,8 +3,8 @@
 import math
 from typing import Sequence
 
-from grammarian.core.models import AnalysisResult, MetricResult
-from grammarian.metrics.base import Metric
+from redpen.core.models import AnalysisResult, MetricResult
+from redpen.metrics.base import Metric
 
 
 def geometric_mean(values: Sequence[float], weights: Sequence[float] | None = None) -> float:

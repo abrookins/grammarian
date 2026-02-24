@@ -5,8 +5,8 @@ from typing import Any
 
 from spellchecker import SpellChecker
 
-from grammarian.core.models import Issue, MetricResult, Severity
-from grammarian.metrics.base import Metric
+from redpen.core.models import Issue, MetricResult, Severity
+from redpen.metrics.base import Metric
 
 
 class SpellingMetric(Metric):
@@ -44,7 +44,7 @@ class SpellingMetric(Metric):
                 # Common abbreviations
                 "etc", "eg", "ie", "vs", "ci", "cd",
                 # This project
-                "grammarian", "mfcqi", "wqi", "proselint", "textstat",
+                "redpen", "mfcqi", "wqi", "proselint", "textstat",
                 "litellm", "pydantic", "readability", "flesch", "kincaid",
                 "gunning", "smog", "liau", "gitpython",
             ]

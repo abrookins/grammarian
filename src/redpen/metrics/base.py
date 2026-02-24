@@ -1,9 +1,9 @@
-"""Base metric class for Grammarian."""
+"""Base metric class for Proseq."""
 
 from abc import ABC, abstractmethod
 from typing import Any
 
-from grammarian.core.models import MetricResult
+from redpen.core.models import MetricResult
 
 
 class Metric(ABC):

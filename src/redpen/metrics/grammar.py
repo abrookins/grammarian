@@ -2,8 +2,8 @@
 
 from typing import Any
 
-from grammarian.core.models import Issue, MetricResult, Severity
-from grammarian.metrics.base import Metric
+from redpen.core.models import Issue, MetricResult, Severity
+from redpen.metrics.base import Metric
 
 
 class GrammarMetric(Metric):

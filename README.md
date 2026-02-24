@@ -1,4 +1,4 @@
-# Grammarian
+# Redpen
 
 A "Drake Equation" for English writing quality — a CLI tool that produces a single quality score from multiple prose metrics.
 
@@ -8,7 +8,7 @@ A "Drake Equation" for English writing quality — a CLI tool that produces a si
 
 ## Overview
 
-Grammarian produces a single **Writing Quality Index (WQI)** score (0.0-1.0) by combining multiple prose quality metrics using a geometric mean, similar to how [MFCQI](https://github.com/bsbodden/mfcqi) works for code quality.
+Redpen produces a single **Writing Quality Index (WQI)** score (0.0-1.0) by combining multiple prose quality metrics using a geometric mean, similar to how [MFCQI](https://github.com/bsbodden/mfcqi) works for code quality.
 
 **Key Features:**
 - Single composite score from multiple metrics
@@ -22,14 +22,14 @@ Grammarian produces a single **Writing Quality Index (WQI)** score (0.0-1.0) by 
 
 ```bash
 # Using pip
-pip install grammarian
+pip install redpen
 
 # Using uv (recommended)
-uv pip install grammarian
+uv pip install redpen
 
 # From source
-git clone https://github.com/youruser/grammarian.git
-cd grammarian
+git clone https://github.com/youruser/redpen.git
+cd redpen
 uv pip install -e .
 ```
 
@@ -37,7 +37,7 @@ uv pip install -e .
 
 For AI-powered feedback:
 ```bash
-pip install grammarian[ai]
+pip install redpen[ai]
 # or
 pip install litellm
 ```
@@ -51,28 +51,28 @@ pip install language-tool-python
 
 ```bash
 # Analyze a single file
-grammarian analyze README.md
+redpen analyze README.md
 
 # Analyze multiple files or directories
-grammarian analyze README.md docs/ CONTRIBUTING.md
+redpen analyze README.md docs/ CONTRIBUTING.md
 
 # Analyze only changed files (git diff)
-grammarian analyze --diff
+redpen analyze --diff
 
 # Analyze staged changes only
-grammarian analyze --diff --staged
+redpen analyze --diff --staged
 
 # Use a specific writing profile
-grammarian analyze docs/ --profile technical
+redpen analyze docs/ --profile technical
 
 # Get AI-powered feedback
-grammarian analyze README.md --ai
+redpen analyze README.md --ai
 
 # JSON output for CI/CD
-grammarian analyze . --format json
+redpen analyze . --format json
 
 # Fail if score is below threshold
-grammarian analyze . --min-score 0.75
+redpen analyze . --min-score 0.75
 ```
 
 ## The Writing Quality Index (WQI)
@@ -100,7 +100,7 @@ This approach ensures that:
 
 ## Metrics
 
-Grammarian evaluates text across four dimensions:
+Redpen evaluates text across four dimensions:
 
 ### Readability
 
@@ -142,28 +142,28 @@ Analyzes writing style and clarity:
 
 ## Configuration
 
-Grammarian looks for configuration in these locations (in order):
+Redpen looks for configuration in these locations (in order):
 
-1. `.grammarian.toml` in current or parent directories
-2. `grammarian.toml` in current or parent directories
-3. `pyproject.toml` under `[tool.grammarian]`
+1. `.redpen.toml` in current or parent directories
+2. `redpen.toml` in current or parent directories
+3. `pyproject.toml` under `[tool.redpen]`
 
 ### Generating a Configuration File
 
 Use the `config init` command to generate a comprehensive example configuration:
 
 ```bash
-# Generate .grammarian.toml in current directory
-grammarian config init
+# Generate .redpen.toml in current directory
+redpen config init
 
 # Generate with a custom filename
-grammarian config init --output custom.toml
+redpen config init --output custom.toml
 
 # Preview the config without writing to file
-grammarian config init --stdout
+redpen config init --stdout
 
 # Overwrite an existing config file
-grammarian config init --force
+redpen config init --force
 ```
 
 The generated file includes all available options with documentation comments.
@@ -171,7 +171,7 @@ The generated file includes all available options with documentation comments.
 ### Configuration File Format
 
 ```toml
-# .grammarian.toml
+# .redpen.toml
 
 # Default profile to use
 default_profile = "technical"
@@ -218,7 +218,7 @@ options = { disabled_rules = ["WHITESPACE_RULE"] }
 [metrics.spelling]
 enabled = true
 weight = 1.0
-options = { custom_words = ["grammarian", "WQI"] }
+options = { custom_words = ["redpen", "WQI"] }
 
 [metrics.style]
 enabled = true
@@ -277,18 +277,18 @@ disabled_rules = [
 | `COMMA_PARENTHESIS_WHITESPACE` | Comma/parenthesis spacing |
 | `UPPERCASE_SENTENCE_START` | Sentence capitalization |
 
-Run `grammarian config init` to generate a configuration file with all common rules documented.
+Run `redpen config init` to generate a configuration file with all common rules documented.
 
 ## Git Integration
 
-Grammarian integrates with Git to analyze only changed content:
+Redpen integrates with Git to analyze only changed content:
 
 ```bash
 # Analyze all unstaged changes
-grammarian analyze --diff
+redpen analyze --diff
 
 # Analyze only staged changes (useful for pre-commit)
-grammarian analyze --diff --staged
+redpen analyze --diff --staged
 ```
 
 This is particularly useful for:
@@ -298,14 +298,14 @@ This is particularly useful for:
 
 ## AI-Powered Feedback
 
-With LiteLLM installed, Grammarian can provide AI-powered writing suggestions:
+With LiteLLM installed, Redpen can provide AI-powered writing suggestions:
 
 ```bash
 # Get AI feedback on your writing
-grammarian analyze README.md --ai
+redpen analyze README.md --ai
 
 # Use a specific model
-grammarian analyze README.md --ai --ai-model gpt-4
+redpen analyze README.md --ai --ai-model gpt-4
 ```
 
 The AI advisor:
@@ -316,7 +316,7 @@ The AI advisor:
 
 ### Supported LLM Providers
 
-Grammarian uses [LiteLLM](https://github.com/BerriAI/litellm), supporting 100+ LLM providers:
+Redpen uses [LiteLLM](https://github.com/BerriAI/litellm), supporting 100+ LLM providers:
 
 - OpenAI (GPT-4, GPT-3.5)
 - Anthropic (Claude)
@@ -342,7 +342,7 @@ name: Writing Quality Check
 on: [push, pull_request]
 
 jobs:
-  grammarian:
+  redpen:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -352,11 +352,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install Grammarian
-        run: pip install grammarian
+      - name: Install Redpen
+        run: pip install redpen
 
       - name: Check writing quality
-        run: grammarian analyze docs/ --min-score 0.7 --format json
+        run: redpen analyze docs/ --min-score 0.7 --format json
 ```
 
 ### Pre-commit Hook
@@ -367,9 +367,9 @@ Add to `.pre-commit-config.yaml`:
 repos:
   - repo: local
     hooks:
-      - id: grammarian
+      - id: redpen
         name: Check writing quality
-        entry: grammarian analyze --diff --staged --min-score 0.7
+        entry: redpen analyze --diff --staged --min-score 0.7
         language: python
         types: [markdown, text, rst]
         pass_filenames: false
@@ -386,11 +386,11 @@ repos:
 ## CLI Reference
 
 ```
-grammarian [OPTIONS] COMMAND [ARGS]...
+redpen [OPTIONS] COMMAND [ARGS]...
 
 Commands:
   analyze  Analyze text files for writing quality
-  config   Manage Grammarian configuration
+  config   Manage Redpen configuration
 
 Options:
   --version  Show version and exit
@@ -400,7 +400,7 @@ Options:
 ### `analyze` Command
 
 ```
-grammarian analyze [OPTIONS] [PATHS]...
+redpen analyze [OPTIONS] [PATHS]...
 
 Arguments:
   PATHS  Files or directories to analyze
@@ -419,7 +419,7 @@ Options:
 ### `config` Command
 
 ```
-grammarian config [OPTIONS] COMMAND [ARGS]...
+redpen config [OPTIONS] COMMAND [ARGS]...
 
 Commands:
   init  Generate an example configuration file
@@ -428,10 +428,10 @@ Commands:
 ### `config init` Command
 
 ```
-grammarian config init [OPTIONS]
+redpen config init [OPTIONS]
 
 Options:
-  -o, --output PATH  Output file path (default: .grammarian.toml)
+  -o, --output PATH  Output file path (default: .redpen.toml)
   -s, --stdout       Print to stdout instead of writing to file
   -f, --force        Overwrite existing configuration file
   --help             Show help message and exit
@@ -440,11 +440,11 @@ Options:
 ## Programmatic Usage
 
 ```python
-from grammarian.calculator import Calculator
-from grammarian.metrics.readability import ReadabilityMetric
-from grammarian.metrics.grammar import GrammarMetric
-from grammarian.metrics.spelling import SpellingMetric
-from grammarian.metrics.style import StyleMetric
+from redpen.calculator import Calculator
+from redpen.metrics.readability import ReadabilityMetric
+from redpen.metrics.grammar import GrammarMetric
+from redpen.metrics.spelling import SpellingMetric
+from redpen.metrics.style import StyleMetric
 
 # Create calculator with metrics
 calculator = Calculator([
@@ -474,8 +474,8 @@ for metric in result.metrics:
 
 ```bash
 # Clone the repository
-git clone https://github.com/youruser/grammarian.git
-cd grammarian
+git clone https://github.com/youruser/redpen.git
+cd redpen
 
 # Create virtual environment
 uv venv
@@ -488,10 +488,10 @@ uv pip install -e ".[dev]"
 pytest tests/ -v
 
 # Run with coverage
-pytest tests/ --cov=grammarian --cov-report=term-missing
+pytest tests/ --cov=redpen --cov-report=term-missing
 
 # Run the CLI
-grammarian analyze README.md
+redpen analyze README.md
 ```
 
 ## License

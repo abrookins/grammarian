@@ -1,2 +1,0 @@
-"""Metrics module for Grammarian."""
-

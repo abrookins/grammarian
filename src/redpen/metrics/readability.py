@@ -4,8 +4,8 @@ from typing import Any
 
 import textstat
 
-from grammarian.core.models import MetricResult
-from grammarian.metrics.base import Metric
+from redpen.core.models import MetricResult
+from redpen.metrics.base import Metric
 
 
 class ReadabilityMetric(Metric):

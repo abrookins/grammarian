@@ -1,4 +1,4 @@
-"""Configuration management for Grammarian."""
+"""Configuration management for Proseq."""
 
 from pathlib import Path
 from typing import Any
@@ -41,7 +41,7 @@ class LLMConfig(BaseModel):
     context: str = ""  # Additional context about writing style/audience
 
 
-class GrammarianConfig(BaseModel):
+class RedpenConfig(BaseModel):
     """Main configuration model."""
 
     profiles: dict[str, ProfileConfig] = Field(default_factory=dict)
@@ -51,7 +51,7 @@ class GrammarianConfig(BaseModel):
     extensions: list[str] = Field(default_factory=lambda: [".md", ".txt", ".rst"])
 
     @classmethod
-    def load(cls, path: Path | None = None) -> "GrammarianConfig":
+    def load(cls, path: Path | None = None) -> "RedpenConfig":
         """Load configuration from file."""
         if path is None:
             path = cls._find_config()
@@ -64,17 +64,17 @@ class GrammarianConfig(BaseModel):
     @classmethod
     def _find_config(cls) -> Path | None:
         """Find config file in current or parent directories."""
-        names = [".grammarian.toml", "grammarian.toml", "pyproject.toml"]
+        names = [".redpen.toml", "redpen.toml", "pyproject.toml"]
         cwd = Path.cwd()
         for parent in [cwd, *cwd.parents]:
             for name in names:
                 path = parent / name
                 if path.exists():
                     if name == "pyproject.toml":
-                        # Check if it has [tool.grammarian] section
+                        # Check if it has [tool.redpen] section
                         with open(path, "rb") as f:
                             data = tomllib.load(f)
-                        if "tool" in data and "grammarian" in data["tool"]:
+                        if "tool" in data and "redpen" in data["tool"]:
                             return path
                     else:
                         return path

@@ -2,9 +2,9 @@
 
 import pytest
 
-from grammarian.metrics.readability import ReadabilityMetric
-from grammarian.metrics.spelling import SpellingMetric
-from grammarian.metrics.style import StyleMetric
+from redpen.metrics.readability import ReadabilityMetric
+from redpen.metrics.spelling import SpellingMetric
+from redpen.metrics.style import StyleMetric
 
 
 class TestReadabilityMetric:

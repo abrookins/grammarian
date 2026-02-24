@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from grammarian.git.diff import (
+from redpen.git.diff import (
     get_repo,
     get_changed_files,
     get_changed_content,
@@ -36,7 +36,7 @@ class TestGetChangedFiles:
 
     def test_no_repo_returns_empty(self, tmp_path: Path) -> None:
         """When no repo exists, returns empty list."""
-        with patch("grammarian.git.diff.get_repo", return_value=None):
+        with patch("redpen.git.diff.get_repo", return_value=None):
             result = get_changed_files(repo=None)
             assert result == []
 
@@ -84,7 +84,7 @@ class TestGetChangedContent:
 
     def test_no_repo_returns_empty(self) -> None:
         """When no repo exists, returns empty dict."""
-        with patch("grammarian.git.diff.get_repo", return_value=None):
+        with patch("redpen.git.diff.get_repo", return_value=None):
             result = get_changed_content()
             assert result == {}
 
@@ -119,7 +119,7 @@ class TestGetChangedText:
 
     def test_empty_when_no_files(self) -> None:
         """Returns empty string when no changed files."""
-        with patch("grammarian.git.diff.get_changed_files", return_value=[]):
+        with patch("redpen.git.diff.get_changed_files", return_value=[]):
             result = get_changed_text()
             assert result == ""
 
@@ -130,7 +130,7 @@ class TestGetChangedText:
         file1.write_text("Content 1")
         file2.write_text("Content 2")
         
-        with patch("grammarian.git.diff.get_changed_files", return_value=[file1, file2]):
+        with patch("redpen.git.diff.get_changed_files", return_value=[file1, file2]):
             result = get_changed_text()
             assert "Content 1" in result
             assert "Content 2" in result
@@ -139,13 +139,13 @@ class TestGetChangedText:
         """Gracefully handles files that can't be read."""
         nonexistent = tmp_path / "missing.md"
         
-        with patch("grammarian.git.diff.get_changed_files", return_value=[nonexistent]):
+        with patch("redpen.git.diff.get_changed_files", return_value=[nonexistent]):
             result = get_changed_text()
             assert result == ""
 
     def test_default_extensions(self) -> None:
         """Default extensions are .md, .txt, .rst."""
-        with patch("grammarian.git.diff.get_changed_files") as mock:
+        with patch("redpen.git.diff.get_changed_files") as mock:
             mock.return_value = []
             get_changed_text()
             mock.assert_called_with(repo=None, staged=False, extensions=[".md", ".txt", ".rst"])
@@ -155,7 +155,7 @@ class TestGetChangedText:
         binary_file = tmp_path / "binary.md"
         binary_file.write_bytes(b"\x80\x81\x82")
 
-        with patch("grammarian.git.diff.get_changed_files", return_value=[binary_file]):
+        with patch("redpen.git.diff.get_changed_files", return_value=[binary_file]):
             result = get_changed_text()
             assert result == ""
 
